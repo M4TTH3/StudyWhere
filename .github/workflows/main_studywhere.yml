@@ -31,8 +31,8 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Create and start virtual environment
-        run: pip install --upgrade pip
         run: |
+          pip install --upgrade pip
           python -m venv venv
           source venv/bin/activate
 
