@@ -1,0 +1,133 @@
+.lds-ring {
+    display: inline-block;
+    position: fixed;
+    width: 80px;
+    height: 80px;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.lds-ring div {
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    margin: 8px;
+    border: 8px solid #000000;
+    border-radius: 50%;
+    animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    --tw-bg-opacity: 1;
+    border-color: rgb(132 204 22 / var(--tw-bg-opacity)) transparent transparent transparent;
+}
+
+.lds-ring div:nth-child(1) {
+    animation-delay: -0.45s;
+}
+
+.lds-ring div:nth-child(2) {
+    animation-delay: -0.3s;
+}
+
+.lds-ring div:nth-child(3) {
+    animation-delay: -0.15s;
+}
+
+@keyframes lds-ring {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#scrollindicator {
+    position: fixed;
+
+    top: 50%;
+    left: 82%;
+    transform: translate(-50%, -50%);
+}
+
+#scrollindicator span {
+    display: block;
+    width: 30px;
+    height: 30px;
+    border-bottom: 2px solid black;
+    border-right: 2px solid black;
+    transform: rotate(45deg);
+    margin: -5px;
+    animation: animate 2s infinite;
+}
+
+#scrollindicator span:nth-child(2) {
+    animation-delay: -0.2s;
+}
+
+#scrollindicator span:nth-child(3) {
+    animation-delay: -0.4s;
+}
+
+
+@keyframes animate {
+    0% {
+        opacity: 0;
+        transform: rotate(45deg) translate(-20px, -20px);
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 50;
+        transform: rotate(45deg) translate(20px, 20px);
+    }
+}
+
+:root {
+    --navbarheight: 90px;
+    --borderheight: 8px;
+}
+
+#pageModal {
+    position: fixed;
+    z-index: 1;
+    width: 100vw;
+    /* width: 100dvw; */
+    height: calc(100vh - var(--navbarheight));
+    height: calc(100dvh - var(--navbarheight)); /* Mobile */
+    top: var(--navbarheight);
+    background-color: rgba(0, 0, 0, 0.6);
+
+    /* Centering a div ;) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#pageModal .pageModalContent {
+    height: clamp(50px, 10vw, 150px);
+    width: clamp(200px, 30vw, 500px);
+
+    background-color: white;
+    border: thick solid green;
+    border-radius: 30px;
+
+    /* Centering a div ;) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+}
+
+@media (width <= 768px) {
+    :root {
+        --navbarheight: 60px;
+    }
+}

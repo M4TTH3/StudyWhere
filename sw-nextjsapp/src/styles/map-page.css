@@ -1,0 +1,21 @@
+:root {
+    --navbarheight: 90px;
+    --borderheight: 8px;
+}
+
+#map-page-container {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - var(--navbarheight));
+    height: calc(100dvh - var(--navbarheight));
+    border-top: var(--borderheight) solid gray;
+
+    display: flex;
+    justify-content: center;
+}
+
+@media (width <= 768px) {
+    :root {
+        --navbarheight: 60px;
+    }
+}

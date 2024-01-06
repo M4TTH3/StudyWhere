@@ -1,0 +1,87 @@
+.tabcontainer {
+    position: relative;
+    padding: 5px 20px 5px 20px;
+    border: 1px transparent;
+    border-radius: 10px;
+}
+
+#navbar {
+    position: relative;
+    display: flex;
+
+    height: 90px;
+    flex-direction: row;
+    align-items: center;
+
+    justify-content: space-evenly;
+    padding: 0px 8% 0px 8%;
+    box-shadow: 0 10px 15px rgba(0,0,0,0.06);
+}
+
+#Logo {
+    width: 123px;
+    height: 40px;
+    vertical-align: middle;
+}
+
+
+#navbar a, #login, #logout {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    text-decoration: none;
+    font-size: 1.5em;
+    font-weight: 700;
+    color: darkgrey;
+    transition: 0.3s ease-in-out;
+}
+
+#login, #logout {
+    background-color: transparent;
+    color: rgb(63, 63, 63);
+}
+
+#navbar a:hover,
+#navbar a.active, 
+#login:hover,
+#logout:hover{
+    color: black;
+    cursor: pointer;
+}
+
+#navbar a.active .tabcontainer {
+    background-color: rgb(209, 208, 208);
+}
+
+@media (width < 1024px){
+    #navbar a, #login, #logout {
+        font-size: 1rem;
+    }
+    #Logo {
+        width: 90px;
+        height: 30px
+    }
+    #navbar li {
+        padding: 0 5px;
+    }
+}
+
+@media (width < 768px){
+    #navbar a, #login, #logout {
+        font-size: 0.8rem;
+    }
+    #Logo {
+        width: 50px;
+        height: 22px
+    }
+    #navbar li {
+        padding: 0 5px;
+    }
+    #navbar {
+        height: 60px;
+    }
+    .tabcontainer {
+        padding: 5px 10px 5px 10px;
+    }
+
+}

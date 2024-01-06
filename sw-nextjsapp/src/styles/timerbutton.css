@@ -1,0 +1,24 @@
+.timer-button {
+    width: clamp(20px, 40%, 300px);
+    border: 5px solid #000;
+    border-radius: 20px;
+    background-color: rgba(212, 180, 131, 0.5);
+    box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.1);
+    color: black;
+    text-align: center;
+    padding: 5px 0px 5px 0px;
+}
+
+.timer-button:hover {
+    background-color: rgba(212, 180, 131, 0.7);
+}
+
+.start-session-button {
+    width: clamp(40px, 40%, 300px);
+}
+
+@media (width <= 780px) {
+    .start-session-button {
+        padding: 10px 0px 10px 0px
+    }
+}

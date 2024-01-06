@@ -1,0 +1,157 @@
+#session-form {
+    width: 40%;
+    height: 90%;
+    background: white;
+
+    border: solid 4px green;
+    border-radius: 30px;
+
+    display: grid;
+    grid-template-rows: 1fr 14fr;
+}
+
+@media (width <= 780px) {
+    #session-form {
+        width: 80%;
+    }
+}
+
+#session-form form {
+    margin-top: 5%;
+    display: grid;
+    grid-template-rows: 4fr 1fr;
+}
+
+#session-form form ul {
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    gap: 15px;
+
+    margin-inline: auto;
+    place-items: flex-start;
+}
+
+#session-form form ul li {
+    width: 100%;
+    display: grid;
+    
+    grid-template-columns: 1fr 4fr;
+    gap: 4%;
+}
+
+#session-form form ul li label {
+    color: rgb(101 163 13);;
+    font-size: 1.5em;
+    text-align: left;
+}
+
+#session-form form ul li input {
+    border: solid 2px gainsboro;
+    border-radius: 5px;
+    width: 100%;
+    padding-left: 5px;
+}
+
+#session-form form ul li input:hover {
+    border-color: gray;
+}
+
+#session-form form ul li input:focus {
+    border-color: black;
+}
+
+#session-form form ul li input.room-textbox {
+    width: clamp(40px, 30%, 100px);
+}
+
+#session-form form ul li.form-description {
+    display: flex;
+    flex-direction: column;
+}
+
+#session-form form ul li.input-row {
+    margin-top: 8%;
+    width: 80%;
+    display: block;
+    margin-inline: auto;
+}
+
+#session-form form ul li.input-row label {
+    font-size: 1.5em;
+}
+
+#capacitySlider[type='range'] {
+    margin-top: 4%;
+
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    border: 0.5px black solid;
+    border-radius: 30px;
+    cursor: pointer;
+    padding: 0px 0px 0px 0px;
+    width: 100%;
+}
+
+:root {
+    --track-height: 1rem;
+    --thumb-height: 2rem;
+}
+
+#capacitySlider::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, yellow, red);
+    border-radius: 30px;
+    height: var(--track-height);
+}
+
+#capacitySlider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    
+    margin-top: calc((var(--track-height) / 2) - (var(--thumb-height) / 2)); /* Centers thumb on the track */
+    background-color: rgb(0, 190, 0);
+    height: var(--thumb-height);
+    width: 1rem;    
+    border: 2px black solid;
+    border-radius: 20px; 
+ }
+
+#capacitySlider:hover {
+    cursor: pointer;
+}
+
+#capacitySlider:focus {
+    outline: none;
+    border-width: 1.5px;
+}
+
+.submit-button {
+    width: clamp(100px, 40%, 180px);
+    height: 50%;
+
+    background-color: rgba(212, 180, 131, 0.5);
+
+    border: 2px solid black;
+    border-radius: 30px;
+
+    color: black;
+    margin-inline: auto;
+}
+
+.submit-button:hover {
+    animation: blink 2s infinite;
+    cursor: pointer;
+    border-width: 3px;
+}
+
+.submit-button:focus {
+    animation: blink 2s infinite;
+    border-width: 3px;
+}
+
+@keyframes blink {
+    50% {
+        background-color: rgba(212, 180, 131, 1);
+    }
+}
