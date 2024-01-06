@@ -11,4 +11,4 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 app.register_functions(friends)
 app.register_functions(user)
-app.register_functions(session)
+# app.register_functions(session)
