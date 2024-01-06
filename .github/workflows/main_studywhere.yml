@@ -11,12 +11,16 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'sw-azurefn' # set this to the path to your web app project, defaults to the repository root
   PYTHON_VERSION: '3.10' # set this to the python version to use (supports 3.6, 3.7, 3.8)
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory:
+          ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,7 +36,9 @@ jobs:
           source venv/bin/activate
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
 
       # Optional: Add step to run tests here
 
