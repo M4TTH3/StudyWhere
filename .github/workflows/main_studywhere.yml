@@ -20,7 +20,7 @@ jobs:
     defaults:
       run:
         working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-        
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -50,6 +50,8 @@ jobs:
         with:
           name: python-app
           path: |
+            ls -a
+            pwd
             ./release.zip
             !venv/
 
