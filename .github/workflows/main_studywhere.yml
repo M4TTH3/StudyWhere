@@ -54,8 +54,8 @@ jobs:
         with:
           name: python-app
           path: |
-            release.zip
-            !venv/
+            ./sw-azurefn/release.zip
+            !./sw-azurefn/venv/
 
   deploy:
     runs-on: ubuntu-latest
