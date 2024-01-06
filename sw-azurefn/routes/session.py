@@ -1,6 +1,6 @@
 import azure.functions as func 
 import logging
-from .helpers.error import bad_request, internal_server
+from .helpers.error import bad_request
 from .helpers.auth import auth_decorator
 from .helpers.cosmos import session_container
 import json
@@ -96,6 +96,7 @@ def delete_session(req: func.HttpRequest, queueOut: func.Out[str]) -> func.HttpR
         }))
 
     return delete()
+
 
 
 @bp.function_name('submit_session')

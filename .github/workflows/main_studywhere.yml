@@ -11,16 +11,12 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'sw-azurefn' # set this to the path to your web app project, defaults to the repository root
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: './sw-azurefn' # set this to the path to your web app project, defaults to the repository root
   PYTHON_VERSION: '3.10' # set this to the python version to use (supports 3.6, 3.7, 3.8)
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,31 +27,27 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Create and start virtual environment
+        path: ./sw-azurefn
         run: |
           python -m venv venv
           source venv/bin/activate
 
       - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
+        path: './sw-azurefn'
+        run: pip install -r requirements.txt
 
       # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
-        run: |
-          ls -al
-          zip release.zip ./* -r
-          ls -al
-          pwd
+        run: zip release.zip ./sw-azurefn -r
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: python-app
           path: |
-            ./sw-azurefn/release.zip
-            !./sw-azurefn/venv/
+            release.zip
+            !venv/
 
   deploy:
     runs-on: ubuntu-latest
@@ -79,7 +71,7 @@ jobs:
         with:
           app-name: 'studywhere'
           slot-name: 'Production'
-          package: .
+          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           scm-do-build-during-deployment: true
           enable-oryx-build: true
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_64C63523FB7E42438F64B6AC54B1330C }}
