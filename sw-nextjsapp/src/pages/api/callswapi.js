@@ -5,16 +5,16 @@ export default async function handler(req, res) {
             return;
         }
 
-        // const backEndEnpoint = 'https://api.studywhere.ca/api/'; // Prod
-        const backEndEnpoint = 'http://localhost:7071/api/'
+        const backEndEnpoint = 'https://api.studywhere.ca/api/'; // Prod
+        // const backEndEnpoint = 'http://localhost:7071/api/'
 
         const body = req.body;
         const endpoint = backEndEnpoint + body.endpoint;
         const params = body.params;
 
-        console.log(params)
-
         const data = await fetch(endpoint, params);
+
+        console.log(data)
         
         if (data.status !== 200) {
             res.status(data.status).json({message: data.statusText});
