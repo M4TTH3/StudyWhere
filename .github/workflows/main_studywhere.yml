@@ -43,16 +43,18 @@ jobs:
       # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: |
+          ls -al
+          zip release.zip ./* -r
+          ls -al
+          pwd
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: python-app
           path: |
-            ls -a
-            pwd
-            ./release.zip
+            release.zip
             !venv/
 
   deploy:
