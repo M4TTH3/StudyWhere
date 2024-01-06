@@ -17,10 +17,10 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    default:
+    defaults:
       run:
         working-directory:
-          './sw-azurefn'
+          ./sw-azurefn
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
