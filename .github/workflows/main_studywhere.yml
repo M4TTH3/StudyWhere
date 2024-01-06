@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: './sw-azurefn' # set this to the path to your web app project, defaults to the repository root
   PYTHON_VERSION: '3.10' # set this to the python version to use (supports 3.6, 3.7, 3.8)
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
         with:
           name: python-app
           path: |
-            ./sw-azurefn/*
+            ./sw-azurefn
             !venv/
             !sw-azurefn/venv/
 
@@ -69,6 +69,6 @@ jobs:
           app-name: 'studywhere'
           slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4148CB16421847A19954D44145602555 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_64C63523FB7E42438F64B6AC54B1330C }}
           scm-do-build-during-deployment: true
           enable-oryx-build: true
