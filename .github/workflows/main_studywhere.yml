@@ -27,14 +27,12 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Create and start virtual environment
-        path: ./sw-azurefn
         run: |
-          python -m venv venv
-          source venv/bin/activate
+          python -m venv ./sw-azurefn/venv
+          source ./sw-azurefn/venv/bin/activate
 
       - name: Install dependencies
-        path: './sw-azurefn'
-        run: pip install -r requirements.txt
+        run: pip install -r ./sw-azurefn/requirements.txt
 
       # Optional: Add step to run tests here
 
