@@ -1,4 +1,3 @@
-import azure.functions as func
 from .cosmos import user_container
 import requests as req
 import os

@@ -1,4 +1,4 @@
-import azure.functions as func 
+from flask import Response, request as req, Blueprint, Request
 import json
 from .helpers.userattr import UserData, details_list, details
 from .helpers.error import bad_request, internal_server
@@ -8,24 +8,21 @@ from .helpers.auth import token_decode, UNAUTHORIZEDACCESS
 class FriendNotFound(Exception):
     pass
     
-def friend_decorator(friend_func) -> func.HttpResponse:
+def friend_decorator(friend_func) -> Response:
     "A decorator that authorizes the account and passes the token and additional arguments"
 
-    def friend_wrapper_ret(req: func.HttpResponse) -> func.HttpResponse:
+    def friend_wrapper(*args, **kwargs) -> Response:
         token = token_decode(req)
         if not token:
             return UNAUTHORIZEDACCESS
         try:
-            return friend_func(req, token)
+            return friend_func(token)
         
         except CosmosHttpResponseError:
             return bad_request("Unable to retrieve accounts")
         
         except FriendNotFound:
             return bad_request("Friend not found")
-    
-    def friend_wrapper(req: func.HttpRequest) -> func.HttpResponse:
-        return friend_wrapper_ret(req)
         
     return friend_wrapper
     
@@ -38,33 +35,31 @@ def friends_details(user: UserData) -> dict[str, list[dict[str, dict[str, str]]]
         'friends_out': details_list(user.friends_out)
     }
 
-bp = func.Blueprint()
+bp = Blueprint('friends', __name__, url_prefix='/api')
 
-@bp.function_name(name="get_friends")
-@bp.route(route="me/friends", methods=['GET'], trigger_arg_name='req')
+@bp.route(rule="/me/friends", methods=['GET'], endpoint='get_friends')
 @friend_decorator
-def get_friends(req: func.HttpRequest, token) -> func.HttpResponse:
+def get_friends(token: dict) -> Response:
     "Gets all the friends of a user sorted by email"
     user = UserData(token=token)
-    return func.HttpResponse(body=json.dumps(friends_details(user)))
+    return json.dumps(friends_details(user)), 200
 
-@bp.function_name(name='get_friend')
-@bp.route(route='me/friends/{email:length(3,320)}', methods=['GET'])
+
+@bp.route(rule='/me/friends/<email>', methods=['GET'], endpoint='get_friend')
 @friend_decorator
-def get_friend(req: func.HttpRequest, token: dict) -> func.HttpResponse:
+def get_friend(token: dict) -> Response:
     "Gets a friend"
     user = UserData(token=token)
-    target = req.route_params.get('email')
+    target = req.args.get('email')
     if not target or not target in user.friends:
         raise FriendNotFound
 
-    return func.HttpResponse(body=json.dumps(details(target, user.friends[target])))
+    return json.dumps(details(target, user.friends[target])), 200
 
 
-@bp.function_name(name="add_friend")
-@bp.route(route="me/friends", methods=['POST'])
+@bp.route(rule="/me/friends", methods=['POST'], endpoint='add_friend')
 @friend_decorator
-def add_friend(req: func.HttpRequest, token) -> func.HttpResponse:
+def add_friend(token) -> Response:
     "This function adds a friend"
 
     # The account sending
@@ -101,17 +96,19 @@ def add_friend(req: func.HttpRequest, token) -> func.HttpResponse:
     sender.upload_db()
     receiver.upload_db()
 
-    return func.HttpResponse(json.dumps(friends_details(sender)))
+    return json.dumps(friends_details(sender)), 200
     
 
-@bp.function_name(name="cancel_friend_req")
-@bp.route(route="me/friends/{email:length(3,320)}", methods=['DELETE'])
+@bp.route(rule="/me/friends/<email>", methods=['DELETE'], endpoint='del_friend')
 @friend_decorator
-def del_friend(req: func.HttpRequest, token) -> func.HttpResponse:
+def del_friend(token) -> Response:
     "Cancels a sent friend request, rejects a friend invite, or deletes a friend."
     user = UserData(token=token)
 
-    del_email = req.route_params['email']
+    del_email = req.args.get('email')
+    if not del_email or not del_email in user.friends:
+        raise FriendNotFound
+
     del_user = UserData(email=del_email)
 
     # Delete from friends list
@@ -136,7 +133,7 @@ def del_friend(req: func.HttpRequest, token) -> func.HttpResponse:
     user.upload_db() 
     del_user.upload_db()
 
-    return func.HttpResponse(body=json.dumps(friends_details(user)))
+    return json.dumps(friends_details(user)), 200
 
         
 
