@@ -7,3 +7,5 @@ azure-cosmos
 azure-ad-verify-token
 requests
 azure-storage-queue
+python-dotenv
+gunicorn

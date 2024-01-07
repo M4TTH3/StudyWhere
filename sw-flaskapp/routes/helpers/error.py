@@ -1,5 +1,4 @@
 # A set of functions for error handling
-
 from flask import Response
 import json
 
@@ -9,7 +8,7 @@ def errorRequest(error: str, code: int) -> Response:
             'code': code,
             'message': error
         }),
-        status_code=code
+        status=code
     )
 
 def bad_request(error: str) -> Response:

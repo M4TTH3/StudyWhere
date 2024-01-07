@@ -4,10 +4,10 @@ from .helpers.error import bad_request
 from .helpers.auth import auth_decorator
 from .helpers.cosmos import session_container
 import json
-from azure.storage.queue import QueueClient
+from azure.storage.queue import QueueClient, QueueMessage
 import os
 
-bp = Blueprint('session')
+bp = Blueprint('session', __name__, url_prefix='/api')
 
 def get_queue() -> QueueClient:
     return QueueClient.from_connection_string(os.getenv('AzureWebJobsStorage'), 'sessions')
@@ -32,7 +32,7 @@ int (1-10) :param capacity: How full a location is currently
 SESSION_KEYS = {'times', 'title', 'buildingName', 'roomName', 'latitude', 'longitude', 'tasks', 'capacity'}
 DB_LOCATIONS = (('session1', 'waterloo'), ('session2', 'waterloo'), ('session3', 'waterloo'))
 
-@bp.route(route='me/session', methods=['POST'])
+@bp.route(rule='/me/session', methods=['POST'])
 def add_session() -> Response:
     "Adds a session from any user to the queue to be added into the database"
 
@@ -59,7 +59,7 @@ def add_session() -> Response:
     return upload_queue()
 
 
-@bp.route('me/session', methods=['PATCH'])
+@bp.route('/me/session', methods=['PATCH'])
 def update_session() -> Response:
     logging.info('Updating session')
 
@@ -81,7 +81,7 @@ def update_session() -> Response:
     return update()
 
 
-@bp.route('me/session', methods=['DELETE'])
+@bp.route('/me/session', methods=['DELETE'])
 def delete_session() -> Response:
     logging.info('Deleting user session')
     
@@ -100,14 +100,9 @@ def delete_session() -> Response:
     return delete()
 
 
-def submit_session() -> None:
+def submit_session(queue_msg: 'QueueMessage') -> None:
     "Takes the session actions from the queue and adjusts the database one at a time."
-    logging.info('Uploading session to DB')
     container = session_container()
-
-    queue = get_queue()
-
-    queue_msg = queue.receive_message()
     msg_dict: dict = json.loads(queue_msg.content)
 
     action = msg_dict.pop('action')

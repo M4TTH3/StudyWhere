@@ -5,14 +5,14 @@ from .helpers.userattr import UserData, get_email_domain
 from .helpers.error import bad_request, internal_server
 import json
 
-bp = Blueprint('user')
+bp = Blueprint('user', __name__, url_prefix='/api')
 
-@bp.route(route='newuser/', methods=['POST'])
+@bp.route(rule='/newuser/', methods=['POST'])
 def newuser():
     token = token_decode(req)
     if not token:
         return UNAUTHORIZEDACCESS
-    
+
     user: UserData
 
     try:

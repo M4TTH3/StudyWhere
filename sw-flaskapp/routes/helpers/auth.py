@@ -1,4 +1,4 @@
-import azure.functions as func
+from flask import Request, Response
 from .error import errorRequest, bad_request
 from azure_ad_verify_token import verify_jwt
 from azure.cosmos.exceptions import CosmosHttpResponseError
@@ -7,9 +7,8 @@ import os
 
 UNAUTHORIZEDACCESS = errorRequest('Unauthorized Access', 401)
 
-def token_decode(req: func.HttpRequest) -> dict:
+def token_decode(req: Request) -> dict:
     "Verifies the token received including expiry date etc. and returns the content"
-
     auth_content: str = req.headers.get('Authorization')
     if not auth_content:
         return None
@@ -40,10 +39,10 @@ def token_decode(req: func.HttpRequest) -> dict:
         return None
 
 
-def auth_decorator(req: func.HttpRequest):
+def auth_decorator(req: Request):
     "A decorator for an inner function that authorizes the account and passes the auth jwt token"
     def decorator(my_func):
-        def wrapper() -> func.HttpResponse:
+        def wrapper() -> Response:
             token = token_decode(req)
             if not token:
                 return UNAUTHORIZEDACCESS

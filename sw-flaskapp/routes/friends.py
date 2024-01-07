@@ -11,7 +11,7 @@ class FriendNotFound(Exception):
 def friend_decorator(friend_func) -> Response:
     "A decorator that authorizes the account and passes the token and additional arguments"
 
-    def friend_wrapper_ret() -> Response:
+    def friend_wrapper(*args, **kwargs) -> Response:
         token = token_decode(req)
         if not token:
             return UNAUTHORIZEDACCESS
@@ -24,7 +24,7 @@ def friend_decorator(friend_func) -> Response:
         except FriendNotFound:
             return bad_request("Friend not found")
         
-    return friend_wrapper_ret()
+    return friend_wrapper
     
 
 def friends_details(user: UserData) -> dict[str, list[dict[str, dict[str, str]]]]:
@@ -35,17 +35,17 @@ def friends_details(user: UserData) -> dict[str, list[dict[str, dict[str, str]]]
         'friends_out': details_list(user.friends_out)
     }
 
-bp = Blueprint('friends')
+bp = Blueprint('friends', __name__, url_prefix='/api')
 
-@bp.route(route="me/friends", methods=['GET'], trigger_arg_name='req')
+@bp.route(rule="/me/friends", methods=['GET'], endpoint='get_friends')
 @friend_decorator
-def get_friends(req: Request, token) -> Response:
+def get_friends(token: dict) -> Response:
     "Gets all the friends of a user sorted by email"
     user = UserData(token=token)
     return json.dumps(friends_details(user)), 200
 
 
-@bp.route(route='me/friends/<email>', methods=['GET'])
+@bp.route(rule='/me/friends/<email>', methods=['GET'], endpoint='get_friend')
 @friend_decorator
 def get_friend(token: dict) -> Response:
     "Gets a friend"
@@ -57,7 +57,7 @@ def get_friend(token: dict) -> Response:
     return json.dumps(details(target, user.friends[target])), 200
 
 
-@bp.route(route="me/friends", methods=['POST'])
+@bp.route(rule="/me/friends", methods=['POST'], endpoint='add_friend')
 @friend_decorator
 def add_friend(token) -> Response:
     "This function adds a friend"
@@ -99,7 +99,7 @@ def add_friend(token) -> Response:
     return json.dumps(friends_details(sender)), 200
     
 
-@bp.route(route="me/friends/<email>", methods=['DELETE'])
+@bp.route(rule="/me/friends/<email>", methods=['DELETE'], endpoint='del_friend')
 @friend_decorator
 def del_friend(token) -> Response:
     "Cancels a sent friend request, rejects a friend invite, or deletes a friend."
