@@ -1,11 +1,16 @@
-import azure.functions as func 
+from flask import Blueprint, Response, Request, request as req
 import logging
 from .helpers.error import bad_request
 from .helpers.auth import auth_decorator
 from .helpers.cosmos import session_container
 import json
+from azure.storage.queue import QueueClient
+import os
 
-bp = func.Blueprint()
+bp = Blueprint('session')
+
+def get_queue() -> QueueClient:
+    return QueueClient.from_connection_string(os.getenv('AzureWebJobsStorage'), 'sessions')
 
 """ 
 Sessions will follow this format in the db
@@ -27,15 +32,14 @@ int (1-10) :param capacity: How full a location is currently
 SESSION_KEYS = {'times', 'title', 'buildingName', 'roomName', 'latitude', 'longitude', 'tasks', 'capacity'}
 DB_LOCATIONS = (('session1', 'waterloo'), ('session2', 'waterloo'), ('session3', 'waterloo'))
 
-@bp.function_name('add_session')
 @bp.route(route='me/session', methods=['POST'])
-@bp.queue_output(arg_name='queueOut', queue_name='sessions', connection='AzureWebJobsStorage')
-def add_session(req: func.HttpRequest, queueOut: func.Out[str]) -> func.HttpResponse:
+def add_session() -> Response:
     "Adds a session from any user to the queue to be added into the database"
 
     @auth_decorator(req=req)
-    def upload_queue(token) -> func.HttpRequest:
+    def upload_queue(token) -> Request:
         body: dict = req.get_json()
+        queue = get_queue()
 
         # Ensure we have all the keys
         comparison_set = SESSION_KEYS.union(body.keys())
@@ -45,9 +49,9 @@ def add_session(req: func.HttpRequest, queueOut: func.Out[str]) -> func.HttpResp
         email = token['emails'][0]
         add_to_queue = body | {'action': 'ADD', 'email': email}
 
-        queueOut.set(json.dumps(add_to_queue))
+        queue.send_message(json.dumps(add_to_queue))
 
-        return func.HttpResponse(json.dumps({
+        return Response(json.dumps({
             'code': 200,
             'message': f'Successfully added session'
         }))
@@ -55,23 +59,21 @@ def add_session(req: func.HttpRequest, queueOut: func.Out[str]) -> func.HttpResp
     return upload_queue()
 
 
-@bp.function_name('update_session')
 @bp.route('me/session', methods=['PATCH'])
-@bp.queue_output(arg_name='queueOut', queue_name='sessions', connection='AzureWebJobsStorage')
-def update_session(req: func.HttpRequest, queueOut: func.Out[str]) -> func.HttpResponse:
+def update_session() -> Response:
     logging.info('Updating session')
 
     @auth_decorator(req)
     def update(token):
         body: dict = req.get_json()
+        queue = get_queue()
 
         if not set(body.keys()).issubset(SESSION_KEYS):
             return bad_request('Bad format')
         
         email = token['emails'][0]
-        queueOut.set(json.dumps(body | {'email': email, 'action': 'PATCH'}))
-
-        return func.HttpResponse(json.dumps({
+        queue.send_message(json.dumps(body | {'email': email, 'action': 'PATCH'}))
+        return Response(json.dumps({
             'code': 200,
             'message': f'Updating the session'
         }))
@@ -79,18 +81,18 @@ def update_session(req: func.HttpRequest, queueOut: func.Out[str]) -> func.HttpR
     return update()
 
 
-@bp.function_name('delete_session')
 @bp.route('me/session', methods=['DELETE'])
-@bp.queue_output(arg_name='queueOut', queue_name='sessions', connection='AzureWebJobsStorage')
-def delete_session(req: func.HttpRequest, queueOut: func.Out[str]) -> func.HttpResponse:
+def delete_session() -> Response:
     logging.info('Deleting user session')
     
     @auth_decorator(req=req)
     def delete(token):
-        email = token['emails'][0]
-        queueOut.set(json.dumps({'action': 'DELETE', 'email': email}))
+        queue = get_queue()
 
-        return func.HttpResponse(json.dumps({
+        email = token['emails'][0]
+        queue.send_message(json.dumps({'action': 'DELETE', 'email': email}))
+
+        return Response(json.dumps({
                 'code': 200,
                 'message': 'Deleting the session'
         }))
@@ -98,17 +100,20 @@ def delete_session(req: func.HttpRequest, queueOut: func.Out[str]) -> func.HttpR
     return delete()
 
 
-
-@bp.function_name('submit_session')
-@bp.queue_trigger(arg_name='msg', queue_name='sessions', connection='AzureWebJobsStorage')
-def submit_session(msg: func.QueueMessage) -> None:
+def submit_session() -> None:
     "Takes the session actions from the queue and adjusts the database one at a time."
     logging.info('Uploading session to DB')
     container = session_container()
 
-    msg_dict: dict = msg.get_json()
+    queue = get_queue()
+
+    queue_msg = queue.receive_message()
+    msg_dict: dict = json.loads(queue_msg.content)
+
     action = msg_dict.pop('action')
     email = msg_dict.get('email')
+
+    logging.info(msg=json.dumps(msg_dict))
 
     def db_generator():
         for location_id, partition_key in DB_LOCATIONS:
@@ -124,7 +129,7 @@ def submit_session(msg: func.QueueMessage) -> None:
             if len(sessions) >= 500:
                 continue
             
-            email = msg.get_json()['email']
+            email = msg_dict['email']
             sessions[email] = msg_dict
             container.upsert_item(item)
             return
@@ -155,8 +160,4 @@ def submit_session(msg: func.QueueMessage) -> None:
     if action in foos:
         foos[action]()
 
-
-# @bp.function_name('clear_sessions')
-# @bp.timer_trigger(arg_name='req', schedule="0 */5 * * * *", run_on_startup=True)
-# def clear_sessions(mytimer: func.TimerRequest) -> None:
-#     pass
+    return
