@@ -4,8 +4,9 @@ import Timer from 'comp/timer';
 import TimerButton from 'comp/timerbutton';
 import { useDispatch, useSelector } from 'react-redux';
 import SessionFormModal from 'comp/sessionform';
-import { initializeSession, updateSession, sessionActions } from '@/reducers/sessionSlice';
+import { initializeSession, updateSession, sessionActions, patchSession } from '@/reducers/sessionSlice';
 import { useSWAPI } from 'comp/fetchToken';
+import { useIsAuthenticated } from '@azure/msal-react';
 
 const SessionContext = createContext(null);
 
@@ -33,15 +34,26 @@ export default function SessionPage() {
     const [status, setStatus] = useState(null);
     const [isFormEnabled, setIsFormEnabled] = useState(false);
     const { callSWAPI } = useSWAPI();
+    const isAuth = useIsAuthenticated();
 
     const initialize = (details) => {
+        // Used for initializing a session
         dispatch(initializeSession(details)).unwrap().then((response) => {
             callSWAPI('POST', 'me/session', { optional_args: { body: JSON.stringify(response) } })
                 .catch((error) => console.log(error));
         });
     };
 
+    const patch = (details={}) => {
+        // Used for patching a session through session form. Doesn't modify time.
+        dispatch(patchSession(details)).unwrap().then((response) => {
+            callSWAPI('PATCH', 'me/session', { optional_args: { body: JSON.stringify(response) } })
+                .catch((error) => console.log(error));
+        });
+    };
+
     const update = (details={}) => {
+        // Modify the data, including time.
         dispatch(updateSession(details)).unwrap().then((response) => {
             callSWAPI('PATCH', 'me/session', { optional_args: { body: JSON.stringify(response) } })
                 .catch((error) => console.log(error));
@@ -67,12 +79,23 @@ export default function SessionPage() {
 
     useEffect(() => {
         // Runs once to set the time and status on page load  
-        const times = sessionDetails?.times;
-        const length = times?.length;
-        setTime(getCurrentTime(times));
-        // Check if it was last running
-        length > 0 && setStatus(length % 2 === 1 ? 'RUNNING' : 'PAUSED');
-    }, []);
+        // Initialize the session state
+        const getSession = async () => {
+            const response = await callSWAPI('GET', 'me/session');
+            const data = response?.data;
+
+            if (!data) return;
+
+            const times = data?.times;
+            const length = times?.length;
+            setTime(getCurrentTime(times));
+            length > 0 && setStatus(length % 2 === 1 ? 'RUNNING' : 'PAUSED');
+
+            dispatch(sessionActions.setSession(data))
+        }
+        
+        getSession();
+    }, [isAuth]);
 
     useEffect(() => {
         // Set the timer counting or reset the time when status changed
@@ -86,7 +109,7 @@ export default function SessionPage() {
 
     return (
         <>
-            <SessionContextProvider value={{ setIsFormEnabled, status, setStatus, sessionDetails, initialize, update, reset }}>
+            <SessionContextProvider value={{ setIsFormEnabled, status, setStatus, sessionDetails, initialize, update, reset, patch }}>
                 <div className="SessionPage">
                     <NavBar />
                     <div className='page-container'>

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react"
 import CreateableSelect from 'react-select/creatable'
 import { useSessionContext } from "@/pages/session";
+import { buildings } from "@/buildings/buildings";
 
 export const useCreateTask = () => {
     // Default format for any option in CreateableSelect
@@ -72,7 +73,7 @@ const selectStyle = {
 const SelectBuilding = ({ selectNext, buildingName }) => {
     // Input for selecting a building
     const createTask = useCreateTask()
-    const [options, setOptions] = useState([{ label: "DC", value: "hello" }]);
+    const [options, setOptions] = useState(buildings);
     const settings = { options: options, onKeyDown: (e) => handleKeyDown(e) };
     const { inputValue, setInputValue, currentValue, elementProps }
         = useSelectInput('buildingName', createTask(buildingName), settings);
@@ -140,7 +141,7 @@ export default function SessionFormModal() {
     // The main wrapper of the session form
     const modalRef = useRef(null)
     const formRef = useRef(null)
-    const { setIsFormEnabled, status, setStatus, sessionDetails, initialize, update } = useSessionContext()
+    const { setIsFormEnabled, status, setStatus, sessionDetails, initialize, patch } = useSessionContext()
     const { buildingName, capacity, roomName, tasks, title } = sessionDetails
 
     const submitSessionForm = (event) => {
@@ -149,7 +150,27 @@ export default function SessionFormModal() {
         const details = {};
         new FormData(formRef.current).forEach((value, key) => {
             if (key === 'capacity') details[key] = parseInt(value)
-            else if (key === 'tasks') {
+            else if (key === 'buildingName') {
+                try {
+                    const buildingData = JSON.parse(value);
+                    details['buildingName'] = buildingData.buildingCode;
+                    details['latitude'] = buildingData.coordinates[1];
+                    details['longitude'] = buildingData.coordinates[0];
+                } catch {
+                    details['buildingName'] = value;
+                    if (navigator.geolocation) {
+                        const parseData = (pos) => {
+                            details['latitude'] = pos.coords.latitude;
+                            details['longitude'] = pos.coords.longitude;
+                        };
+                        navigator.geolocation.getCurrentPosition(parseData);
+                    } else {
+                        // Default UWaterloo coordinates
+                        details['latitude'] = 43.4712; 
+                        details['longitude'] = -80.5440;
+                    }
+                }
+            } else if (key === 'tasks') {
                 if (value !== '') details[key] = key in details ? [...details[key], value] : [value]
                 else details[key] = [];
             } else details[key] = value;
@@ -160,7 +181,7 @@ export default function SessionFormModal() {
             initialize(details);
             setStatus('RUNNING');
         } else {
-            update(details); // Updating the information
+            patch(details); // Updating the information
         };
 
         setIsFormEnabled(false);

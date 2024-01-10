@@ -1,16 +1,21 @@
 import React from 'react';
 import NavBar from 'comp/navbar';
+import Image from 'next/image';
 
 export default function HomePage () {
     
     return (
         <div className="HomePage scrollpage">
             <NavBar/>
-            <div className='mt-12'>
-                <h3>Matthew, Becky, & Shawn</h3>
-                <p>We have to change our logo cus its too long up and down</p>
-                <p>I'll try to draw out our logo so it would look better</p>
-                <img src={'/kangaroo.png'} className='w-[250px] h-auto flex justify-center mx-auto mt-12 drop-shadow-xl'></img>
+            <div className='mt-10 grid-rows-2 text-64'>
+                <div className='ml-5 text-left text-[1.2rem]'>
+                    <span className='font-bold'>Created By: </span>
+                    <span>Matthew Au-Yeung</span>
+                </div>
+                <a href="https://github.com/M4TTH3/StudyWhere">
+                    <Image className='' src="/github-mark.png" alt="Github Repo" width={10} height={10}/> 
+                    <span>Github Repo</span>
+                </a>
             </div>
        
         </div>

@@ -1,5 +1,6 @@
-from flask import Response, request as req, Blueprint, Request
+from flask import Response, request as req, Blueprint, current_app
 import json
+from .helpers.cosmos import session_container
 from .helpers.userattr import UserData, details_list, details
 from .helpers.error import bad_request, internal_server
 from azure.cosmos.exceptions import CosmosHttpResponseError
@@ -17,7 +18,6 @@ def friend_decorator(friend_func) -> Response:
             return UNAUTHORIZEDACCESS
         try:
             return friend_func(token)
-        
         except CosmosHttpResponseError:
             return bad_request("Unable to retrieve accounts")
         
@@ -27,12 +27,32 @@ def friend_decorator(friend_func) -> Response:
     return friend_wrapper
     
 
+def get_sessions(users_email: list[str]) -> dict:
+    ret = {}
+    sessions = {}
+    
+    container = session_container()
+
+    # Have to join all the db_sessions together first
+    for db_sessions in container.read_all_items(max_item_count=3):
+        sessions.update(db_sessions['sessions'])
+
+    for email in users_email:
+        if (email in sessions): ret[email] = sessions[email]
+
+    return ret
+
 def friends_details(user: UserData) -> dict[str, list[dict[str, dict[str, str]]]]:
     "Gets user's friends, friends in, and friends out, public details"
+
+    #Get all friends' sessions too
+    sessions = get_sessions(user.friends.keys())
+
     return {
         'friends': details_list(user.friends),
         'friends_in': details_list(user.friends_in),
-        'friends_out': details_list(user.friends_out)
+        'friends_out': details_list(user.friends_out),
+        'sessions': sessions
     }
 
 bp = Blueprint('friends', __name__, url_prefix='/api')

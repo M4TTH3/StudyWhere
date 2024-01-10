@@ -1,11 +1,12 @@
-from flask import Request, Response
+from flask import Request, Response, current_app
 from .error import errorRequest, bad_request
 from azure_ad_verify_token import verify_jwt
 from azure.cosmos.exceptions import CosmosHttpResponseError
+import requests
 
 import os
 
-UNAUTHORIZEDACCESS = errorRequest('Unauthorized Access', 401)
+UNAUTHORIZEDACCESS = errorRequest('Unauthorized Access to StudyWhere', 401)
 
 def token_decode(req: Request) -> dict:
     "Verifies the token received including expiry date etc. and returns the content"
@@ -25,6 +26,7 @@ def token_decode(req: Request) -> dict:
         client_id = 'c35c7db8-2fd9-44f1-9497-f1116584e1fd'
         aad_issuer = os.getenv('AAD_ISSUER')
         aad_uri = os.getenv('AAD_URI')
+
         payload = verify_jwt(
                     token=token,
                     valid_audiences=[client_id],

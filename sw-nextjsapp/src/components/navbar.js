@@ -1,7 +1,8 @@
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import { loginRequest } from "@/authConfig/authConfig";
+import { useRouter } from "next/router";
 
 function Login() {
     const isAuthenticated = useIsAuthenticated();
@@ -13,7 +14,6 @@ function Login() {
             instance
                 .loginRedirect(loginRequest)
                 .catch((error) => console.log(error));
-            console.log("hi");
         };
 
         return (
@@ -47,10 +47,26 @@ const NavbarItem = ({ tab }) => {
 };
 
 const NavBar = () => {
+
+    const router = useRouter();
+    const navbarRef = useRef(null);
+
+    useEffect(() => {
+        // Set current Link to have classname active
+        const path = router.pathname;
+        for (let child of navbarRef.current.children) {
+            // Remove the http and compare the path
+            const href = child.href?.replace(/(https?:\/\/(?:localhost:3000|studywhere\.ca)\/*)/g, '/')
+            child.className = href == path ? 'active': ''
+        }
+    }, [router, navbarRef]);
+
+
     return (
-        <nav id="navbar">
+        <nav id="navbar" ref={navbarRef}>
             <Link href="/">
-                <img src={'StudyWhere Logo.png'} id="Logo"></img>
+                {/* <img src={'StudyWhere Logo.png'} id="Logo"></img> */}
+                <NavbarItem tab="Home" />
             </Link>
             <Link href="/map">
                 <NavbarItem tab="Map" />
