@@ -4,7 +4,7 @@
 
 flask
 azure-cosmos
-azure-ad-verify-token
+azure-ad-verify-token==0.4.0
 requests
 azure-storage-queue
 python-dotenv

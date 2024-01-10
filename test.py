@@ -1,0 +1,13 @@
+from azure_ad_verify_token import verify_jwt
+
+
+if __name__ == "__main__":
+    payload = verify_jwt(
+        token='eyJhbGciOiJSUzI1NiIsImtpZCI6Ilg1ZVhrNHh5b2pORnVtMWtsMll0djhkbE5QNC1jNTdkTzZRR1RWQndhTmsiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiTWF0dGhldyBBdS1ZZXVuZyIsImlkcCI6Imdvb2dsZS5jb20iLCJvaWQiOiI3YjgxMTkwNi1hYjg1LTQ4N2UtYmRlOS1jYjdiMjg4ZjViMzciLCJzdWIiOiI3YjgxMTkwNi1hYjg1LTQ4N2UtYmRlOS1jYjdiMjg4ZjViMzciLCJlbWFpbHMiOlsibWF0dGhld2F1eWV1bmcwNEBnbWFpbC5jb20iXSwidGZwIjoiQjJDXzFfc2lnbmluc2lnbnVwIiwibm9uY2UiOiI3YjAzODY4OS0yNjEyLTRkNTYtYmEzZC01NjlmMjAxZWIxZjIiLCJzY3AiOiJ3cml0ZS51c2VycyByZWFkLnVzZXJzIiwiYXpwIjoiODRmY2NiZDctYzA1ZS00YzQ5LTkxZWUtYzAyYjJmMGUwYWNiIiwidmVyIjoiMS4wIiwiaWF0IjoxNzA0ODQ4MDkxLCJhdWQiOiJjMzVjN2RiOC0yZmQ5LTQ0ZjEtOTQ5Ny1mMTExNjU4NGUxZmQiLCJleHAiOjE3MDQ4NTE2OTEsImlzcyI6Imh0dHBzOi8vc3R1ZHl3aGVyZS5iMmNsb2dpbi5jb20vZTU0M2M3MTMtZTgyMi00NzVkLTk0YWMtMTIyZmQ0MmNkMzk0L3YyLjAvIiwibmJmIjoxNzA0ODQ4MDkxfQ.eC29K4v0e2p-Cu9eY2PHTeWGLE6AEcQJD9AnUicR8kK8eFSHHINTsnXw2ckBS24wDGBGYyYmNmbP9NEXLfWlMnuzhPyeRy8xJpuKNvZYK83ogpJJ1FdVedcF5M_6NPw8lGELpLyi4g2QktJFsWostfyIFM30due1zl7uVzcc3r-fu_-yq7osjcaxOEE67EYrFdpzIxCfIKBhRdtMFmWrVAxjoMZg9ZtgS9EEmpS7jGFOuCC6j5UKkPdaq1uCDBrK4U4yGK-FdOgj3JDs-AdxZEU3VGCLUmKjnA0M-JTe52AE8dLhNQh44W73merM8zwKb764rvTbdFnGjeLHCSolSA',
+        valid_audiences='c35c7db8-2fd9-44f1-9497-f1116584e1fd',
+        issuer='https://studywhere.b2clogin.com/e543c713-e822-475d-94ac-122fd42cd394/v2.0/',
+        jwks_uri='https://studywhere.b2clogin.com/studywhere.onmicrosoft.com/b2c_1_signinsignup/discovery/v2.0/keys',
+        verify=True
+    )
+
+    print(payload)

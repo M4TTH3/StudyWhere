@@ -50,6 +50,16 @@ export const initializeSession = createAsyncThunk(
     }
 )
 
+// This function is designed to update the information of the text but not the time.
+export const patchSession = createAsyncThunk(
+    'sessionDetails/patch',
+    async (payload, { getState }) => {
+        const currentDetails = getState().sessionDetails;
+        const data = prepareData(payload)?.payload;
+        return { ...currentDetails, ...data};
+    }
+)
+
 export const updateSession = createAsyncThunk(
     'sessionDetails/update',
     async (payload, { getState }) => {
@@ -68,6 +78,11 @@ export const sessionDetailsSlice = createSlice({
             reducer: (state) => {
                 return sessionObject;
             }
+        },
+        setSession: {
+            reducer: (state, action) => {
+                return action.payload;
+            }
         }
     },
     extraReducers: (builder) => {
@@ -76,6 +91,9 @@ export const sessionDetailsSlice = createSlice({
                 return action.payload;
             })
             .addCase(updateSession.fulfilled, (state, action) => {
+                return action.payload;
+            })
+            .addCase(patchSession.fulfilled, (state, action) => {
                 return action.payload;
             });
     }

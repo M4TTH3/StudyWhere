@@ -25,6 +25,8 @@ export function useSWAPI() {
             params: {
                 method: method,
                 headers: {
+                    'Content-type': 'application/json',
+                    'Accept': 'application/json',
                     Authorization: 'Bearer ' + accessToken,
                     ...args.header_options
                 },
@@ -47,7 +49,6 @@ export function useSWAPI() {
                 if (updateLoading) setIsLoading(prev => prev - 1);
                 return response;
             } catch (error) {
-                console.log(error);
                 if (error instanceof InteractionRequiredAuthError) {
                     try {
                         instance.logoutRedirect({});

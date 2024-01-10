@@ -42,6 +42,7 @@ msalInstance.addEventCallback((event) => {
 });
 
 export default function App({ Component, pageProps }) {
+
   return (
     <Provider store={store}>
       <MsalProvider instance={msalInstance}>

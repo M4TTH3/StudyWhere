@@ -1,6 +1,6 @@
-from flask import Blueprint, Response, Request, request as req
+from flask import Blueprint, Response, Request, request as req, current_app
 import logging
-from .helpers.error import bad_request
+from .helpers.error import bad_request, errorRequest
 from .helpers.auth import auth_decorator
 from .helpers.cosmos import session_container
 import json
@@ -29,12 +29,35 @@ int (1-10) :param capacity: How full a location is currently
 
 """
 
-SESSION_KEYS = {'times', 'title', 'buildingName', 'roomName', 'latitude', 'longitude', 'tasks', 'capacity'}
+SESSION_KEYS = {'times', 'title', 'buildingName', 'roomName', 'latitude', 'longitude', 'tasks', 'capacity', 'email'}
 DB_LOCATIONS = (('session1', 'waterloo'), ('session2', 'waterloo'), ('session3', 'waterloo'))
+
+
+@bp.route(rule='/me/session', methods=['GET'])
+def get_session() -> Response:
+    "Gets the users current session if it has one"
+    
+    @auth_decorator(req=req)
+    def session(token) -> Response:
+        container = session_container()
+        email = token['emails'][0]
+        for location_id, partition_key in DB_LOCATIONS:
+            item: dict[str, any] = container.read_item(item=location_id, partition_key=partition_key)
+            sessions: dict[str, any] = item['sessions']
+            session = sessions.get(email)
+
+            if session: return json.dumps(session), 200
+        
+        return errorRequest("Session not found", 404)
+
+    ret = session()
+    return ret
+
 
 @bp.route(rule='/me/session', methods=['POST'])
 def add_session() -> Response:
     "Adds a session from any user to the queue to be added into the database"
+    current_app.logger.info('Adding session')
 
     @auth_decorator(req=req)
     def upload_queue(token) -> Request:
@@ -56,12 +79,14 @@ def add_session() -> Response:
             'message': f'Successfully added session'
         }))
     
-    return upload_queue()
+    ret = upload_queue()
+    read_queue()
+    return ret
 
 
 @bp.route('/me/session', methods=['PATCH'])
 def update_session() -> Response:
-    logging.info('Updating session')
+    current_app.logger.info('Patching session')
 
     @auth_decorator(req)
     def update(token):
@@ -78,12 +103,14 @@ def update_session() -> Response:
             'message': f'Updating the session'
         }))
     
-    return update()
+    ret = update()
+    read_queue()
+    return ret
 
 
 @bp.route('/me/session', methods=['DELETE'])
 def delete_session() -> Response:
-    logging.info('Deleting user session')
+    current_app.logger.info('Deleting session')
     
     @auth_decorator(req=req)
     def delete(token):
@@ -97,7 +124,9 @@ def delete_session() -> Response:
                 'message': 'Deleting the session'
         }))
 
-    return delete()
+    ret = delete()
+    read_queue()
+    return ret
 
 
 def submit_session(queue_msg: 'QueueMessage') -> None:
@@ -107,8 +136,6 @@ def submit_session(queue_msg: 'QueueMessage') -> None:
 
     action = msg_dict.pop('action')
     email = msg_dict.get('email')
-
-    logging.info(msg=json.dumps(msg_dict))
 
     def db_generator():
         for location_id, partition_key in DB_LOCATIONS:
@@ -156,3 +183,15 @@ def submit_session(queue_msg: 'QueueMessage') -> None:
         foos[action]()
 
     return
+
+def read_queue() -> None:
+    queue: QueueClient = get_queue()
+    msg = queue.receive_message()
+    if not msg: 
+        current_app.logger.info('Nothing in the queue')
+        return
+
+    current_app.logger.info('Reading the queue')
+
+    submit_session(msg)
+    queue.delete_message(msg)
