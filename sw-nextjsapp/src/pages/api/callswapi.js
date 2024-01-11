@@ -5,8 +5,8 @@ export default async function handler(req, res) {
             return;
         }
 
-        // const backEndEnpoint = 'https://api.studywhere.ca/api/'; // Prod
-        const backEndEnpoint = 'http://localhost:5000/api/'
+        const backEndEnpoint = 'http://swapi.studywhere.ca/api/'; // Prod
+        // const backEndEnpoint = 'http://localhost:5000/api/'
 
         const body = req.body;
         const endpoint = backEndEnpoint + body.endpoint;

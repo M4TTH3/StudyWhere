@@ -1,0 +1,113 @@
+
+
+.home-header {
+    position: relative;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    margin-top: 10px;
+    font-size: clamp(15px, 2vw, 30px);
+
+}
+
+.home-body {
+    height: max-content;
+    font-size: clamp(15px, 2vw, 30px);
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.demo-map {
+    position: relative;
+    height: 80vh;
+    width: 100vw;
+
+    display: flex;
+    justify-content: center;
+}
+
+.github {
+    justify-self: end;
+    margin-right: 10px;
+
+    width: max-content;
+    display: flex;
+    flex-direction: row;
+
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+@media (width <= 780px) {
+    .home-header {
+        font-size: clamp(10px, 20%, 20px);
+    }
+}
+
+.spacer {
+    height: 20%;
+    width: 100%;
+}
+
+.feature {
+    width: 100vw;
+    height: 80vh;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    border-top: gray solid 3px;
+    border-bottom: gray solid 3px;
+}
+
+.feature-image {
+    width: 100%;
+    height: 100%;
+}
+
+.feature-el {
+    width: 100%;
+    height: 80%;
+}
+
+.feature-carousel-text {
+    background: gray;
+    height: 100%;
+
+    color: white;
+
+    font-size: clamp(10px, 1vw, 15px);
+}
+
+.feature-text {
+    width: 80%;
+    height: 60%;
+
+    padding-bottom: 15%;
+
+    margin: auto;
+
+
+    display: flex;
+    flex-direction: column;
+
+    font-size: clamp(10px, 0.9vw, 15px);
+    
+    gap: 8%;
+    justify-content: center;
+}
+
+@media (width <= 780) {
+    .feature-text {
+        font-size: 8px;
+    }
+}
+
+.feature-carousel {
+    width: 80%;
+    margin: auto
+}
