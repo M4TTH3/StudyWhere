@@ -44,7 +44,7 @@
     background-position: center;
 }
 
-.FriendsPage,.HomePage {
+.FriendsPage, .HomePage {
     text-align: center;
     background-color: white;
     position: fixed;

@@ -22,6 +22,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^9.0.4",
+    "react-responsive-carousel": "^3.2.23",
     "react-select": "^5.8.0"
   },
   "devDependencies": {

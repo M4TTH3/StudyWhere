@@ -9,9 +9,11 @@ import ReactDOMServer from 'react-dom/server'
 // eslint-disable-next-line import/no-webpack-loader-syntax, import/no-unresolved
 // mapboxgl.workerClass = require("worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker").default;
 
-function Map ({ allFriendLists }) {
+export const maptoken = 'pk.eyJ1IjoibTR0dGgiLCJhIjoiY2xpbWNlbWtpMHZrMTNybGd4bWhlc2FrdSJ9.whpIP188eyw34_tScd7oEQ';
+
+function Map ({ allFriendLists, demoSessions }) {
    
-    mapboxgl.accessToken = 'pk.eyJ1IjoibTR0dGgiLCJhIjoiY2xpbWNlbWtpMHZrMTNybGd4bWhlc2FrdSJ9.whpIP188eyw34_tScd7oEQ';
+    mapboxgl.accessToken = maptoken;
 
     const mapContainer = useRef(null);
     const [map, setMap] = useState(null);
@@ -45,9 +47,8 @@ function Map ({ allFriendLists }) {
     useEffect(() => {
         // Setup markers for the map from friend sessions
 
-        if (map && allFriendLists) {
-            console.log('running')
-            const sessions = allFriendLists.sessions;
+        if (map) {
+            const sessions = allFriendLists?.sessions ? {...allFriendLists.sessions, ...demoSessions}: demoSessions;
 
             for (const key in sessions) {
                 const session = sessions[key];
